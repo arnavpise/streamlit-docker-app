@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
 
 st.title("🚀 My First Streamlit App")
 st.write("DONE")
@@ -55,9 +57,11 @@ with st.expander('Input Features'):
 
 
 # Data Preparation
-# Encode
+# Encode X
 encode = ['island', 'sex']
 df_penguins = pd.get_dummies(input_penguins, prefix=encode)
+
+X = df_penguins[1:]
 input_row = df_penguins[:1]
 
 # Encode y
@@ -77,3 +81,27 @@ with st.expander('Data Preparation'):
     st.write('''      Adelie:  0, Chinstrap:  1, Gentoo:  2''')
     st.write('**Encoded y**')
     y
+
+
+# Model training and inference
+# Traing the ML model
+clf = RandomForestClassifier()
+clf.fit(X, y)
+
+
+# Apply model to make predictions
+prediction = clf.predict(input_row)
+prediction_proba = clf.predict_proba(input_row)
+
+df_prediction_proba = pd.DataFrame(prediction_proba)
+df_prediction_proba.columns = ['Adelie', 'Chinstrap', 'Gentoo']
+df_prediction_proba.rename(columns={0: 'Adelie',
+                                    1: 'Chinstrap',
+                                    2: 'Gentoo'})
+
+# Display predicted species
+st.subheader('Predicted Species')
+df_prediction_proba
+
+penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+st.success(str(penguins_species[prediction][0]))
